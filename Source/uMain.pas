@@ -1,10 +1,24 @@
+{***********************************************
+*  Unit Name   : uMain.pas
+*  Description : Окно выполнения ассинхронных задач
+*  Author      : Грицук Д.
+*  Date        : Август 2025
+************************************************}
+
 unit uMain;
 
 interface
 
 uses
-  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
-  Vcl.Controls, Vcl.Forms, Vcl.Dialogs;
+  Winapi.Windows,
+  Winapi.Messages,
+  System.SysUtils,
+  System.Variants,
+  System.Classes,
+  Vcl.Graphics,
+  Vcl.Controls,
+  Vcl.Forms,
+  Vcl.Dialogs;
 
 type
   TMain = class(TForm)

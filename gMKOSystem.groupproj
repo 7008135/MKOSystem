@@ -1,0 +1,48 @@
+﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <PropertyGroup>
+        <ProjectGuid>{905E45FF-8955-4670-884A-83A42FFA9D72}</ProjectGuid>
+    </PropertyGroup>
+    <ItemGroup>
+        <Projects Include="MKOSystem.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="FileScanner.dproj">
+            <Dependencies/>
+        </Projects>
+    </ItemGroup>
+    <ProjectExtensions>
+        <Borland.Personality>Default.Personality.12</Borland.Personality>
+        <Borland.ProjectType/>
+        <BorlandProject>
+            <Default.Personality/>
+        </BorlandProject>
+    </ProjectExtensions>
+    <Target Name="MKOSystem">
+        <MSBuild Projects="MKOSystem.dproj"/>
+    </Target>
+    <Target Name="MKOSystem:Clean">
+        <MSBuild Projects="MKOSystem.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="MKOSystem:Make">
+        <MSBuild Projects="MKOSystem.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="FileScanner">
+        <MSBuild Projects="FileScanner.dproj"/>
+    </Target>
+    <Target Name="FileScanner:Clean">
+        <MSBuild Projects="FileScanner.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="FileScanner:Make">
+        <MSBuild Projects="FileScanner.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="Build">
+        <CallTarget Targets="MKOSystem;FileScanner"/>
+    </Target>
+    <Target Name="Clean">
+        <CallTarget Targets="MKOSystem:Clean;FileScanner:Clean"/>
+    </Target>
+    <Target Name="Make">
+        <CallTarget Targets="MKOSystem:Make;FileScanner:Make"/>
+    </Target>
+    <Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
+</Project>
