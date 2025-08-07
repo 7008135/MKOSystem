@@ -29,11 +29,54 @@ library FileScanner;
 uses
   System.SysUtils,
   System.Classes,
+  System.Generics.Collections,
   uTaskApi in 'Source\Core\uTaskApi.pas',
   uDocParser in 'Source\dll\uDocParser.pas',
   uBinaryPatternParser in 'Source\dll\uBinaryPatternParser.pas';
 
 {$R *.res}
+
+type
+  TFileScanner = class(TInterfacedObject, IPluginModule)
+  private
+    FTasks: TArray<ITaskDefinition>;
+  public
+    constructor Create;
+    destructor Destroy; override;
+
+    function Initialize: Boolean;
+    procedure Finalize;
+    function GetTasks: TList<ITaskDefinition>;
+  end;
+
+
+{ TFileScanner }
+
+constructor TFileScanner.Create;
+begin
+
+end;
+
+destructor TFileScanner.Destroy;
+begin
+
+  inherited;
+end;
+
+procedure TFileScanner.Finalize;
+begin
+
+end;
+
+function TFileScanner.GetTasks: TList<ITaskDefinition>;
+begin
+
+end;
+
+function TFileScanner.Initialize: Boolean;
+begin
+
+end;
 
 begin
 end.

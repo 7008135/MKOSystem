@@ -1,5 +1,5 @@
 ﻿{***********************************************
-*  Unit Name   : uDocParser.pas
+*  Unit Name   : uBinaryPatternParser.pas
 *  Description : Задача 2. Функционал поиска вхождений последовательности символов в файле (в этой-же.dll).
 *  Author      : Грицук Д.
 *  Date        : Август 2025

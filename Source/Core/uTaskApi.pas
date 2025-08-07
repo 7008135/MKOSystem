@@ -11,7 +11,8 @@ interface
 
 uses
   SysUtils,
-  Classes;
+  Classes,
+  System.Generics.Collections;
 
 type
   TTaskDefinitionParam = record
@@ -34,7 +35,7 @@ type
 
     function Initialize: Boolean;
     procedure Finalize;
-    function GetTasks: TArray<ITaskDefinition>;
+    function GetTasks: TList<ITaskDefinition>;
   end;
 
 /// <summary>
