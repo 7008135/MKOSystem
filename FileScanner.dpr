@@ -39,7 +39,8 @@ uses
 type
   TFileScanner = class(TInterfacedObject, IPluginModule)
   private
-    FTasks: TArray<ITaskDefinition>;
+    FTasks: TList<ITaskDefinition>;
+    FNameModule: String;
   public
     constructor Create;
     destructor Destroy; override;
@@ -47,36 +48,53 @@ type
     function Initialize: Boolean;
     procedure Finalize;
     function GetTasks: TList<ITaskDefinition>;
+    function GetNameModule: String;
   end;
-
 
 { TFileScanner }
 
 constructor TFileScanner.Create;
 begin
+  FNameModule := 'Сканер файлов';
 
+  FTasks := TList<ITaskDefinition>.Create;
+  FTasks.Add(TDocParser.Create);
+  FTasks.Add(TBinaryPatternParser.Create);
 end;
 
 destructor TFileScanner.Destroy;
 begin
-
+  Finalize;
   inherited;
 end;
 
 procedure TFileScanner.Finalize;
 begin
+  FreeAndNil(FTasks);
+end;
 
+function TFileScanner.GetNameModule: String;
+begin
+  Result := FNameModule;
 end;
 
 function TFileScanner.GetTasks: TList<ITaskDefinition>;
 begin
-
+  Result := FTasks;
 end;
 
 function TFileScanner.Initialize: Boolean;
 begin
-
+  ;
 end;
+
+function CreatePluginModule: IPluginModule; stdcall;
+begin
+  Result := TFileScanner.Create;
+end;
+
+exports
+  CreatePluginModule;
 
 begin
 end.

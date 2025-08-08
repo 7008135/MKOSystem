@@ -15,16 +15,45 @@ uses
   System.SysUtils,
   System.Variants,
   System.Classes,
+  System.Generics.Collections,
   Vcl.Graphics,
   Vcl.Controls,
   Vcl.Forms,
-  Vcl.Dialogs;
+  Vcl.Dialogs,
+  uTaskApi, Vcl.ComCtrls, Vcl.ExtCtrls, Vcl.BaseImageCollection,
+  Vcl.ImageCollection, System.ImageList, Vcl.ImgList, Vcl.VirtualImageList,
+  Vcl.Buttons, System.Actions, Vcl.ActnList, Vcl.StdCtrls, Vcl.Menus, Vcl.Tabs;
 
 type
   TMain = class(TForm)
+    tvPlugins: TTreeView;
+    Panel1: TPanel;
+    sbtnAddDll: TSpeedButton;
+    VirtualImageList1: TVirtualImageList;
+    ImageCollection1: TImageCollection;
+    ActionList1: TActionList;
+    actAddDll: TAction;
+    sbtnRefreshList: TSpeedButton;
+    actFindDllNextExecutableFile: TAction;
+    Splitter1: TSplitter;
+    StatusBar1: TStatusBar;
+    Panel2: TPanel;
+    pupTreeView: TPopupMenu;
+    tsTasks: TTabSet;
+    Panel3: TPanel;
+    procedure actAddDllExecute(Sender: TObject);
+    procedure actFindDllNextExecutableFileExecute(Sender: TObject);
     procedure FormCreate(Sender: TObject);
+    procedure FormDestroy(Sender: TObject);
+    procedure FormShow(Sender: TObject);
+    procedure tvPluginsDblClick(Sender: TObject);
   private
-    { Private declarations }
+    FPlugins: TList<IPluginModule>;
+    FDLLHandles: TList<THandle>;
+    FslListOfAddedPathDLL: TStringList;
+    procedure LoadPlugin(const ADllPath: String);
+    procedure FindDllNextExecutableFile;
+    procedure RefreshTree;
   public
     { Public declarations }
   end;
@@ -36,9 +65,152 @@ implementation
 
 {$R *.dfm}
 
-procedure TMain.FormCreate(Sender: TObject);
+const
+  DLL_EXT = '.dll';
+
+procedure TMain.actAddDllExecute(Sender: TObject);
 begin
   ;
+end;
+
+procedure TMain.actFindDllNextExecutableFileExecute(Sender: TObject);
+begin
+  FindDllNextExecutableFile;
+  RefreshTree
+end;
+
+procedure TMain.RefreshTree;
+const
+  IMG_INDEX_DLL = 0;
+  IMG_INDEX_FIRST_NODE = 2;
+  IMG_INDEX_TASK = 5;
+
+  NAME_FIRST_NODE = 'Список доступных функций';
+
+  function AddParentNode(const AParent: TTreeNode;
+    const ANameNode: String;
+    const AImageIndex: Integer;
+    const ATast: ITaskDefinition = nil): TTreeNode;
+  begin
+    Result := tvPlugins.Items.AddChild(AParent, ANameNode);
+    Result.ImageIndex := AImageIndex;
+    Result.SelectedIndex := AImageIndex;
+    Result.Data := ATast;
+  end;
+var
+  FirstNode: TTreeNode;
+  PluginNode: TTreeNode;
+begin
+  tvPlugins.Items.Clear;
+  try
+    FirstNode := AddParentNode(nil, NAME_FIRST_NODE, IMG_INDEX_FIRST_NODE);
+
+    for var Plugin in FPlugins do
+    begin
+      PluginNode := AddParentNode(FirstNode, Plugin.GetNameModule, IMG_INDEX_DLL);
+
+      for var Task in Plugin.GetTasks do
+        AddParentNode(PluginNode, Task.GetName, IMG_INDEX_TASK, Task);
+    end;
+  finally
+    tvPlugins.FullExpand;
+  end;
+end;
+
+procedure TMain.tvPluginsDblClick(Sender: TObject);
+var
+  SelectedNode: TTreeNode;
+  NodeData: Pointer;
+  Task: ITaskDefinition;
+begin
+  if tvPlugins.Selected = nil then
+    Exit;
+
+  SelectedNode := tvPlugins.Selected;
+
+  if SelectedNode.Data = nil then
+    Exit;
+
+
+  NodeData := SelectedNode.Data;
+  if Supports(ITaskDefinition(NodeData), ITaskDefinition, Task) then
+  begin
+    tsTasks.Tabs.Add(Task.GetName)
+
+
+  end;
+end;
+
+procedure TMain.FindDllNextExecutableFile;
+var
+  SearchRec: TSearchRec;
+  DirectoryExe: String;
+begin
+  DirectoryExe := ExtractFilePath(ParamStr(0));
+  if FindFirst(DirectoryExe + '*' + DLL_EXT, faAnyFile, SearchRec) = 0 then
+  try
+    repeat
+      LoadPlugin(DirectoryExe + SearchRec.Name)
+    until FindNext(SearchRec) <> 0;
+  finally
+    FindClose(SearchRec);
+  end;
+end;
+
+procedure TMain.FormCreate(Sender: TObject);
+begin
+  FPlugins := TList<IPluginModule>.Create;
+  FDLLHandles := TList<THandle>.Create;
+  FslListOfAddedPathDLL := TStringList.Create;
+
+  {убрать}
+  FindDllNextExecutableFile;
+  RefreshTree
+end;
+
+procedure TMain.FormDestroy(Sender: TObject);
+begin
+  FPlugins.Free;
+  FDLLHandles.Free;
+end;
+
+
+procedure TMain.FormShow(Sender: TObject);
+begin
+  tvPlugins.FullExpand
+end;
+
+procedure TMain.LoadPlugin(const ADllPath: String);
+var
+  hDLL: THandle;
+  CreatePluginFunc: function: IPluginModule; stdcall;
+  Plugin: IPluginModule;
+begin
+  if FileExists(ADllPath)
+    and (ExtractFileExt(ADllPath) = DLL_EXT)
+  then
+  begin
+    hDLL := LoadLibrary(PChar(ADllPath));
+    if hDLL = 0 then
+      Exit;
+
+    @CreatePluginFunc := GetProcAddress(hDLL, CREATE_PLUGIN_MODULE_NAME);
+    if not Assigned(CreatePluginFunc) then
+    begin
+      FreeLibrary(hDLL);
+      Exit;
+    end;
+
+    Plugin := CreatePluginFunc();
+    if not Assigned(Plugin) or not Plugin.Initialize then
+    begin
+      FreeLibrary(hDLL);
+      Exit;
+    end;
+
+    FPlugins.Add(Plugin);
+    FDLLHandles.Add(hDLL);
+  end;
 end;
 
 end.

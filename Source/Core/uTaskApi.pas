@@ -14,6 +14,9 @@ uses
   Classes,
   System.Generics.Collections;
 
+const
+  CREATE_PLUGIN_MODULE_NAME = 'CreatePluginModule';
+
 type
   TTaskDefinitionParam = record
     Param: String;
@@ -36,6 +39,7 @@ type
     function Initialize: Boolean;
     procedure Finalize;
     function GetTasks: TList<ITaskDefinition>;
+    function GetNameModule: String;
   end;
 
 /// <summary>

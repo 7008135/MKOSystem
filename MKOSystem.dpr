@@ -14,7 +14,6 @@ begin
 
   Application.DefaultFont.Name := 'Segoe UI';
   Application.DefaultFont.Size := 10;
-  Application.DefaultFont.Color := clBtnHighlight;
 
   Application.CreateForm(TMain, Main);
   Application.Run;
