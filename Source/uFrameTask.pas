@@ -8,6 +8,7 @@ uses
   System.SysUtils,
   System.Variants,
   System.Classes,
+  System.Types,
   System.Threading,
   Vcl.Graphics,
   Vcl.Controls,
@@ -50,7 +51,6 @@ type
     procedure pupLstResultPopup(Sender: TObject);
     procedure tmrActionAfterExecueTimer(Sender: TObject);
   private
-    FTaskExecute: TTask;
     FTask: ITaskDefinition;
     FTaskParam: TArray<TTaskDefinitionParam>;
     FTaskAnonymousThread: TThread;
@@ -58,7 +58,7 @@ type
   public
     constructor Create(AOwner: TComponent;
       const ATask: ITaskDefinition;
-      const ATabIndex: Integer);
+      const ATabIndex: Integer); reintroduce;
     destructor Destroy; override;
   end;
 

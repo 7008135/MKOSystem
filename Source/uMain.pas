@@ -15,6 +15,7 @@ uses
   System.SysUtils,
   System.Variants,
   System.Classes,
+  System.Types,
   System.Generics.Collections,
   Vcl.Graphics,
   Vcl.Controls,
@@ -198,6 +199,7 @@ var
   TaskName: String;
   FrameTask: TFrameTask;
 begin
+  FrameTask := nil;
   if Assigned(ATask) then
   try
     TaskName := ATask.GetName;
