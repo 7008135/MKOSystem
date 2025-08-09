@@ -27,11 +27,12 @@ type
 
   ITaskDefinition = interface
     ['{70363433-EFD4-4560-916D-FBA3BF75BAA5}']
-
     function GetName: String;
     function GetDescription: String;
     function GetRequiredParams: TArray<TTaskDefinitionParam>;
-    function Execute(const AParams: TArray<TTaskDefinitionParam>): Boolean;
+    function Execute(const AParams: TArray<TTaskDefinitionParam>;
+      var AResultMsg: String): Boolean;
+    procedure StopExecute;
   end;
 
   IPluginModule = interface

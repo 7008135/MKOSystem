@@ -35,10 +35,12 @@ type
     prbrProcessTask: TProgressBar;
     ListBox1: TListBox;
     Splitter1: TSplitter;
+    SpeedButton1: TSpeedButton;
     procedure vleParamsTaskMouseMove(Sender: TObject; Shift: TShiftState; X,
       Y: Integer);
     procedure actStartExecute(Sender: TObject);
     procedure actStopExecute(Sender: TObject);
+    procedure SpeedButton1Click(Sender: TObject);
   private
     FTaskExecute: TTask;
     FTask: ITaskDefinition;
@@ -73,6 +75,8 @@ procedure TFrameTask.actStartExecute(Sender: TObject);
         FTaskParam[Index].Value := KeyValue;
     end;
   end;
+var
+  ResultMsg: String;
 begin
   if not AreAllKeysFilled then
     raise Exception.Create('Заполните все свойства значениями!');
@@ -81,28 +85,48 @@ begin
   actStart.Enabled := False;
 
   prbrProcessTask.State := pbsNormal;
-
   FTaskAnonymousThread := TThread.CreateAnonymousThread(
   procedure
+  var
+    ExcResult: Boolean;
   begin
-    FTask.Execute(FTaskParam);
+    ExcResult := FTask.Execute(FTaskParam, ResultMsg);
 
     TThread.Synchronize(nil,
       procedure
       begin
+        {Остановим прогресс}
         prbrProcessTask.State := pbsPaused;
 
+        {Обновим состояние кнопокй}
         actStop.Enabled := False;
         actStart.Enabled := True;
+
+        {Выведем ответ если он есть}
+        if ResultMsg <> '' then
+          if ExcResult then
+            MessageBox(Handle, PChar(ResultMsg),
+              'Уведомление', MB_OK + MB_ICONINFORMATION)
+          else
+            MessageBox(Handle, PChar(ResultMsg),
+              'Внимание!', MB_OK + MB_ICONWARNING)
       end);
   end);
   FTaskAnonymousThread.Start;
+end;
+
+procedure TFrameTask.SpeedButton1Click(Sender: TObject);
+begin
+  {Тестовые данные}
+  vleParamsTask.Values[vleParamsTask.Keys[1]] := '*.txt,*.doc';
+  vleParamsTask.Values[vleParamsTask.Keys[2]] := 'G:\_Загрузки';
 end;
 
 procedure TFrameTask.StopTaskThread;
 begin
   if Assigned(FTaskAnonymousThread) then
   begin
+    FTask.StopExecute;
     FTaskAnonymousThread.Resume;
     FreeAndNil(FTaskAnonymousThread);
   end;

@@ -29,7 +29,7 @@ type
   private
     FName: String;
     FDescription: String;
-
+    FStopExecute: Boolean;
   public
     constructor Create;
     destructor Destroy; override;
@@ -38,7 +38,8 @@ type
     function GetName: string;
     function GetDescription: string;
     function GetRequiredParams: TArray<TTaskDefinitionParam>;
-    function Execute(const AParams: TArray<TTaskDefinitionParam>): Boolean;
+    function Execute(const AParams: TArray<TTaskDefinitionParam>; var AResultMsg: String): Boolean;
+    procedure StopExecute;
     {FINISH - Реализация интерфейса}
   end;
 
@@ -52,6 +53,7 @@ begin
   FDescription := 'Количество найденных вхождений. Например, (“libsec”, '+
     '“p:\Dumps\BigFile.bin”). Здесь “libsec”- однобайтовые символы, поиск в бинарном '+
     'файле.';
+  FStopExecute := False;
 end;
 
 destructor TBinaryPatternParser.Destroy;
@@ -60,7 +62,7 @@ begin
   inherited;
 end;
 
-function TBinaryPatternParser.Execute(const AParams: TArray<TTaskDefinitionParam>): Boolean;
+function TBinaryPatternParser.Execute(const AParams: TArray<TTaskDefinitionParam>; var AResultMsg: String): Boolean;
 begin
 
 end;
@@ -81,6 +83,11 @@ begin
     MakeParam('Characters', 'Последовательность символов', 'Последовательность символов через запятую: libsec,f,a'),
     MakeParam('ScanFilePath', 'Путь к BIN', 'Путь к бинарному файлу: G:\_Загрузки\Test.bin')
   ];
+end;
+
+procedure TBinaryPatternParser.StopExecute;
+begin
+  FStopExecute := True;
 end;
 
 end.
