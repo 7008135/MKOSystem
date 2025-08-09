@@ -114,6 +114,17 @@ object FrameTask: TFrameTask
     ExplicitTop = 160
     ExplicitWidth = 185
     ExplicitHeight = 41
+    object lblMessageResult: TLabel
+      AlignWithMargins = True
+      Left = 3
+      Top = 436
+      Width = 279
+      Height = 13
+      Align = alBottom
+      Caption = '---'
+      Visible = False
+      ExplicitWidth = 12
+    end
     object prbrProcessTask: TProgressBar
       AlignWithMargins = True
       Left = 3
@@ -126,19 +137,18 @@ object FrameTask: TFrameTask
       TabOrder = 1
       ExplicitWidth = 282
     end
-    object ListBox1: TListBox
+    object lstResult: TListBox
       AlignWithMargins = True
       Left = 3
       Top = 3
       Width = 279
-      Height = 446
+      Height = 427
       Align = alClient
       ItemHeight = 13
+      PopupMenu = pupLstResult
       TabOrder = 0
-      ExplicitLeft = 56
-      ExplicitTop = 128
-      ExplicitWidth = 121
-      ExplicitHeight = 97
+      ExplicitLeft = 6
+      ExplicitHeight = 446
     end
   end
   object alMain: TActionList
@@ -250,5 +260,22 @@ object FrameTask: TFrameTask
     Height = 24
     Left = 400
     Top = 400
+  end
+  object pupLstResult: TPopupMenu
+    OnPopup = pupLstResultPopup
+    Left = 399
+    Top = 355
+    object miCopyResultItem: TMenuItem
+      Caption = #1057#1082#1086#1087#1080#1088#1086#1074#1072#1090#1100
+      ShortCut = 16451
+      OnClick = miCopyResultItemClick
+    end
+  end
+  object tmrActionAfterExecue: TTimer
+    Enabled = False
+    Interval = 6000
+    OnTimer = tmrActionAfterExecueTimer
+    Left = 399
+    Top = 307
   end
 end

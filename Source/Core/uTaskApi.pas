@@ -18,6 +18,8 @@ const
   CREATE_PLUGIN_MODULE_NAME = 'CreatePluginModule';
 
 type
+  PStrings = ^TStrings;
+
   TTaskDefinitionParam = record
     Param: String;
     NameParam: string;
@@ -31,7 +33,8 @@ type
     function GetDescription: String;
     function GetRequiredParams: TArray<TTaskDefinitionParam>;
     function Execute(const AParams: TArray<TTaskDefinitionParam>;
-      var AResultMsg: String): Boolean;
+      var AResultMsg: String;
+      const PResultStrings: PStrings): Boolean;
     procedure StopExecute;
   end;
 

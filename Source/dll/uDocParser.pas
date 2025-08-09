@@ -40,7 +40,9 @@ type
     function GetName: string;
     function GetDescription: string;
     function GetRequiredParams: TArray<TTaskDefinitionParam>;
-    function Execute(const AParams: TArray<TTaskDefinitionParam>; var AResultMsg: String): Boolean;
+    function Execute(const AParams: TArray<TTaskDefinitionParam>; 
+      var AResultMsg: String;
+      const PResultStrings: PStrings): Boolean;
     procedure StopExecute;
     {FINISH - Реализация интерфейса}
   end;
@@ -68,7 +70,10 @@ begin
   inherited;
 end;
 
-function TDocParser.Execute(const AParams: TArray<TTaskDefinitionParam>; var AResultMsg: String): Boolean;
+function TDocParser.Execute(const AParams: TArray<TTaskDefinitionParam>; 
+  var AResultMsg: String;
+  const PResultStrings: PStrings): Boolean;
+  
   function CheckParams: Boolean;
   begin
     Result := True;
@@ -87,15 +92,15 @@ function TDocParser.Execute(const AParams: TArray<TTaskDefinitionParam>; var ARe
   end;
 
   procedure FindFilesByMasks(const ARootFolder, 
-    AFileMasks: string; AListFoundFiles: TStringList);
+    AFileMasks: string);
   var
     Masks: TStringList;
     Mask: string;
     Files: TStringDynArray;
   begin
-    AListFoundFiles.BeginUpdate;
+    PResultStrings.BeginUpdate;
     try
-      AListFoundFiles.Clear;
+      PResultStrings.Clear;
       Masks := TStringList.Create;
       try
         Masks.Delimiter := ',';
@@ -104,17 +109,17 @@ function TDocParser.Execute(const AParams: TArray<TTaskDefinitionParam>; var ARe
 
         for Mask in Masks do
         begin
+          if FStopExecute then
+            Exit;
+            
           Files := TDirectory.GetFiles(ARootFolder, Trim(Mask), TSearchOption.soAllDirectories);
-          AListFoundFiles.AddStrings(Files);
+          PResultStrings.AddStrings(Files);
         end;
       finally
         Masks.Free;
       end;
-
-      AListFoundFiles.Duplicates := dupIgnore;
-      AListFoundFiles.Sort;
     finally
-      AListFoundFiles.EndUpdate;
+      PResultStrings.EndUpdate;
     end;
   end;
 
@@ -122,28 +127,34 @@ const
   MSG_NOT_ACCESS = 'Отказано в действии. ';
 var
   FileMasks, SearchPath: String;
-  ListFoundFiles: TStringList;
 begin
   Result := False;
   AResultMsg := '';
+  try
+    if not Assigned(PResultStrings) then
+    begin
+      AResultMsg := MSG_NOT_ACCESS + 'Не указан ресурс результата!';
+      Exit;
+    end;
 
-  if not CheckParams then
-  begin
-    AResultMsg := MSG_NOT_ACCESS + 'Заполните все свойства значениями!';
-    Exit;
-  end;
+    if not CheckParams then
+    begin
+      AResultMsg := MSG_NOT_ACCESS + 'Заполните все свойства значениями!';
+      Exit;
+    end;
 
-  FillData(FileMasks, SearchPath);
-  if not DirectoryExists(SearchPath) then
-  begin
-    AResultMsg := MSG_NOT_ACCESS + 'Указанного путя поиска не существует!';
-    Exit;
-  end;
+    FillData(FileMasks, SearchPath);
+    if not DirectoryExists(SearchPath) then
+    begin
+      AResultMsg := MSG_NOT_ACCESS + 'Указанного путя поиска не существует!';
+      Exit;
+    end;
   
-  ListFoundFiles := TStringList.Create;
-  FindFilesByMasks(SearchPath, FileMasks, ListFoundFiles); 
-
-
+    FindFilesByMasks(SearchPath, FileMasks);
+  finally
+    FStopExecute := False;
+  end;
+   
 end;
 
 function TDocParser.GetDescription: string;

@@ -18,7 +18,8 @@ uses
   Vcl.ActnList, System.ImageList,
   Vcl.ImgList, Vcl.VirtualImageList,
   Vcl.BaseImageCollection,
-  Vcl.ImageCollection, Vcl.ComCtrls, Vcl.StdCtrls;
+  Vcl.ImageCollection, Vcl.ComCtrls, Vcl.StdCtrls, Vcl.Menus,
+  Clipbrd;
 
 type
   TFrameTask = class(TFrame)
@@ -33,14 +34,21 @@ type
     VirtualImageList1: TVirtualImageList;
     Panel2: TPanel;
     prbrProcessTask: TProgressBar;
-    ListBox1: TListBox;
+    lstResult: TListBox;
     Splitter1: TSplitter;
     SpeedButton1: TSpeedButton;
+    pupLstResult: TPopupMenu;
+    miCopyResultItem: TMenuItem;
+    tmrActionAfterExecue: TTimer;
+    lblMessageResult: TLabel;
     procedure vleParamsTaskMouseMove(Sender: TObject; Shift: TShiftState; X,
       Y: Integer);
     procedure actStartExecute(Sender: TObject);
     procedure actStopExecute(Sender: TObject);
     procedure SpeedButton1Click(Sender: TObject);
+    procedure miCopyResultItemClick(Sender: TObject);
+    procedure pupLstResultPopup(Sender: TObject);
+    procedure tmrActionAfterExecueTimer(Sender: TObject);
   private
     FTaskExecute: TTask;
     FTask: ITaskDefinition;
@@ -89,8 +97,13 @@ begin
   procedure
   var
     ExcResult: Boolean;
+    ResultStrings: TStrings;
   begin
-    ExcResult := FTask.Execute(FTaskParam, ResultMsg);
+    FTaskAnonymousThread.FreeOnTerminate := False;
+    lstResult.Clear;
+
+    ResultStrings := lstResult.Items;
+    ExcResult := FTask.Execute(FTaskParam, ResultMsg, @ResultStrings);
 
     TThread.Synchronize(nil,
       procedure
@@ -101,6 +114,10 @@ begin
         {Обновим состояние кнопокй}
         actStop.Enabled := False;
         actStart.Enabled := True;
+
+        lblMessageResult.Visible := True;
+        lblMessageResult.Caption := Format('Задача завершена, результатов: %d', [lstResult.Items.Count]);
+        tmrActionAfterExecue.Enabled := True;
 
         {Выведем ответ если он есть}
         if ResultMsg <> '' then
@@ -125,11 +142,20 @@ end;
 procedure TFrameTask.StopTaskThread;
 begin
   if Assigned(FTaskAnonymousThread) then
-  begin
+  try
+    Screen.Cursor := crHourGlass;
     FTask.StopExecute;
-    FTaskAnonymousThread.Resume;
+    FTaskAnonymousThread.WaitFor;
     FreeAndNil(FTaskAnonymousThread);
+  finally
+    Screen.Cursor := crDefault;
   end;
+end;
+
+procedure TFrameTask.tmrActionAfterExecueTimer(Sender: TObject);
+begin
+  tmrActionAfterExecue.Enabled := False;
+  lblMessageResult.Visible := False;
 end;
 
 procedure TFrameTask.actStopExecute(Sender: TObject);
@@ -167,6 +193,16 @@ destructor TFrameTask.Destroy;
 begin
   StopTaskThread;
   inherited;
+end;
+
+procedure TFrameTask.miCopyResultItemClick(Sender: TObject);
+begin
+  Clipboard.AsText := lstResult.Items[lstResult.ItemIndex]
+end;
+
+procedure TFrameTask.pupLstResultPopup(Sender: TObject);
+begin
+  miCopyResultItem.Enabled := (lstResult.ItemIndex <> -1)
 end;
 
 procedure TFrameTask.vleParamsTaskMouseMove(Sender: TObject; Shift: TShiftState;

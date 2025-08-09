@@ -38,7 +38,9 @@ type
     function GetName: string;
     function GetDescription: string;
     function GetRequiredParams: TArray<TTaskDefinitionParam>;
-    function Execute(const AParams: TArray<TTaskDefinitionParam>; var AResultMsg: String): Boolean;
+    function Execute(const AParams: TArray<TTaskDefinitionParam>;
+      var AResultMsg: String;
+      const PResultStrings: PStrings): Boolean;
     procedure StopExecute;
     {FINISH - Реализация интерфейса}
   end;
@@ -62,7 +64,9 @@ begin
   inherited;
 end;
 
-function TBinaryPatternParser.Execute(const AParams: TArray<TTaskDefinitionParam>; var AResultMsg: String): Boolean;
+function TBinaryPatternParser.Execute(const AParams: TArray<TTaskDefinitionParam>;
+  var AResultMsg: String;
+  const PResultStrings: PStrings): Boolean;
 begin
 
 end;
