@@ -8,13 +8,17 @@ uses
   System.SysUtils,
   System.Variants,
   System.Classes,
+  System.Threading,
   Vcl.Graphics,
   Vcl.Controls,
   Vcl.Forms,
   Vcl.Dialogs,
-  uTaskApi, Vcl.ExtCtrls, Vcl.Grids, Vcl.ValEdit, Vcl.Buttons, System.Actions,
-  Vcl.ActnList, System.ImageList, Vcl.ImgList, Vcl.VirtualImageList,
-  Vcl.BaseImageCollection, Vcl.ImageCollection, Vcl.ComCtrls, Vcl.StdCtrls;
+  uTaskApi, Vcl.ExtCtrls, Vcl.Grids,
+  Vcl.ValEdit, Vcl.Buttons, System.Actions,
+  Vcl.ActnList, System.ImageList,
+  Vcl.ImgList, Vcl.VirtualImageList,
+  Vcl.BaseImageCollection,
+  Vcl.ImageCollection, Vcl.ComCtrls, Vcl.StdCtrls;
 
 type
   TFrameTask = class(TFrame)
@@ -28,7 +32,7 @@ type
     ImageCollection1: TImageCollection;
     VirtualImageList1: TVirtualImageList;
     Panel2: TPanel;
-    ProgressBar1: TProgressBar;
+    prbrProcessTask: TProgressBar;
     ListBox1: TListBox;
     Splitter1: TSplitter;
     procedure vleParamsTaskMouseMove(Sender: TObject; Shift: TShiftState; X,
@@ -36,8 +40,11 @@ type
     procedure actStartExecute(Sender: TObject);
     procedure actStopExecute(Sender: TObject);
   private
+    FTaskExecute: TTask;
     FTask: ITaskDefinition;
     FTaskParam: TArray<TTaskDefinitionParam>;
+    FTaskAnonymousThread: TThread;
+    procedure StopTaskThread;
   public
     constructor Create(AOwner: TComponent;
       const ATask: ITaskDefinition;
@@ -52,13 +59,58 @@ implementation
 { TFrameTask }
 
 procedure TFrameTask.actStartExecute(Sender: TObject);
+  function AreAllKeysFilled: Boolean;
+  var
+    KeyValue: String;
+  begin
+    Result := True;
+    for var Index := 0 to vleParamsTask.Strings.Count - 1 do
+    begin
+      KeyValue := vleParamsTask.Values[vleParamsTask.Keys[Index + 1]];
+      if Trim(KeyValue) = '' then
+        Exit(False)
+      else
+        FTaskParam[Index].Value := KeyValue;
+    end;
+  end;
 begin
-  ;
+  if not AreAllKeysFilled then
+    raise Exception.Create('Заполните все свойства значениями!');
+
+  actStop.Enabled := True;
+  actStart.Enabled := False;
+
+  prbrProcessTask.State := pbsNormal;
+
+  FTaskAnonymousThread := TThread.CreateAnonymousThread(
+  procedure
+  begin
+    FTask.Execute(FTaskParam);
+
+    TThread.Synchronize(nil,
+      procedure
+      begin
+        prbrProcessTask.State := pbsPaused;
+
+        actStop.Enabled := False;
+        actStart.Enabled := True;
+      end);
+  end);
+  FTaskAnonymousThread.Start;
+end;
+
+procedure TFrameTask.StopTaskThread;
+begin
+  if Assigned(FTaskAnonymousThread) then
+  begin
+    FTaskAnonymousThread.Resume;
+    FreeAndNil(FTaskAnonymousThread);
+  end;
 end;
 
 procedure TFrameTask.actStopExecute(Sender: TObject);
 begin
-  ;
+  StopTaskThread
 end;
 
 constructor TFrameTask.Create(AOwner: TComponent;
@@ -74,6 +126,7 @@ constructor TFrameTask.Create(AOwner: TComponent;
 begin
   inherited Create(AOwner);
   actStop.Enabled := False;
+  FTaskAnonymousThread := nil;
 
   Name := Name + '_' + ATabIndex.ToString;
   FTask := ATask;
@@ -88,7 +141,7 @@ end;
 
 destructor TFrameTask.Destroy;
 begin
-
+  StopTaskThread;
   inherited;
 end;
 

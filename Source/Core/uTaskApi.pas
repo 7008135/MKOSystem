@@ -22,6 +22,7 @@ type
     Param: String;
     NameParam: string;
     DescriptionParam: string;
+    Value: Variant;
   end;
 
   ITaskDefinition = interface
@@ -30,7 +31,7 @@ type
     function GetName: String;
     function GetDescription: String;
     function GetRequiredParams: TArray<TTaskDefinitionParam>;
-    function Execute(const AParams: TTaskDefinitionParam): Boolean;
+    function Execute(const AParams: TArray<TTaskDefinitionParam>): Boolean;
   end;
 
   IPluginModule = interface
@@ -71,6 +72,7 @@ begin
   Result.Param := AParam;
   Result.NameParam := ANameParam;
   Result.DescriptionParam := ADescriptionParam;
+  Result.Value := '';
 end;
 
 end.

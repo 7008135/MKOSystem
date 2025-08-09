@@ -37,7 +37,7 @@ type
     function GetName: string;
     function GetDescription: string;
     function GetRequiredParams: TArray<TTaskDefinitionParam>;
-    function Execute(const AParams: TTaskDefinitionParam): Boolean;
+    function Execute(const AParams: TArray<TTaskDefinitionParam>): Boolean;
     {FINISH - Реализация интерфейса}
   end;
 
@@ -59,9 +59,9 @@ begin
   inherited;
 end;
 
-function TDocParser.Execute(const AParams: TTaskDefinitionParam): Boolean;
+function TDocParser.Execute(const AParams: TArray<TTaskDefinitionParam>): Boolean;
 begin
-
+  Sleep(4000);
 end;
 
 function TDocParser.GetDescription: string;

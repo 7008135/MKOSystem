@@ -95,7 +95,7 @@ object FrameTask: TFrameTask
     ExplicitTop = 160
     ExplicitWidth = 185
     ExplicitHeight = 41
-    object ProgressBar1: TProgressBar
+    object prbrProcessTask: TProgressBar
       AlignWithMargins = True
       Left = 3
       Top = 455

@@ -205,11 +205,12 @@ begin
       ATask, FTasksFrameCreated);
     FrameTask.Parent := pnlTasks;
 
-    tsTasks.Tabs.AddObject(TaskName, FrameTask);
   finally
+    inc(FTasksFrameCreated);
+    tsTasks.Tabs.AddObject(Format('%s #%d', [TaskName, FTasksFrameCreated ]), FrameTask);
+
     tsTasks.TabIndex := tsTasks.Tabs.Count - 1;
     tsTasks.Refresh;
-    inc(FTasksFrameCreated);
   end;
 end;
 
