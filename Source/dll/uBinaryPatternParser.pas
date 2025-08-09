@@ -78,8 +78,8 @@ end;
 function TBinaryPatternParser.GetRequiredParams: TArray<TTaskDefinitionParam>;
 begin
   Result := [
-    MakeParam('FileMasks', 'Маски файлов', 'Одна или несколько масок через запятую, пример: *.txt,*.doc'),
-    MakeParam('SearchPath', 'Путь для поиска', 'Корневая папка для поиска файлов')
+    MakeParam('Characters', 'Последовательность символов', 'Последовательность символов через запятую: libsec,f,a'),
+    MakeParam('ScanFilePath', 'Путь к BIN', 'Путь к бинарному файлу: G:\_Загрузки\Test.bin')
   ];
 end;
 

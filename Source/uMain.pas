@@ -20,9 +20,12 @@ uses
   Vcl.Controls,
   Vcl.Forms,
   Vcl.Dialogs,
-  uTaskApi, Vcl.ComCtrls, Vcl.ExtCtrls, Vcl.BaseImageCollection,
+  uTaskApi, Vcl.ComCtrls,
+  Vcl.ExtCtrls, Vcl.BaseImageCollection,
   Vcl.ImageCollection, System.ImageList, Vcl.ImgList, Vcl.VirtualImageList,
-  Vcl.Buttons, System.Actions, Vcl.ActnList, Vcl.StdCtrls, Vcl.Menus, Vcl.Tabs;
+  Vcl.Buttons, System.Actions,
+  Vcl.ActnList, Vcl.StdCtrls, Vcl.Menus, Vcl.Tabs,
+  uFrameTask;
 
 type
   TMain = class(TForm)
@@ -40,20 +43,31 @@ type
     Panel2: TPanel;
     pupTreeView: TPopupMenu;
     tsTasks: TTabSet;
-    Panel3: TPanel;
+    pnlTasks: TPanel;
+    pupTabSet: TPopupMenu;
+    miCloseTab: TMenuItem;
     procedure actAddDllExecute(Sender: TObject);
     procedure actFindDllNextExecutableFileExecute(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure tvPluginsDblClick(Sender: TObject);
+    procedure miCloseTabClick(Sender: TObject);
+    procedure tsTasksChange(Sender: TObject; NewTab: Integer;
+      var AllowChange: Boolean);
+    procedure actCloseTabExecute(Sender: TObject);
+    procedure tsTasksMouseDown(Sender: TObject; Button: TMouseButton;
+      Shift: TShiftState; X, Y: Integer);
   private
     FPlugins: TList<IPluginModule>;
     FDLLHandles: TList<THandle>;
     FslListOfAddedPathDLL: TStringList;
+    FTasksFrameCreated: Integer;
     procedure LoadPlugin(const ADllPath: String);
     procedure FindDllNextExecutableFile;
     procedure RefreshTree;
+    procedure CreateTaskTab(const ATask: ITaskDefinition);
+    procedure CloseTab(const X, Y: Integer);
   public
     { Public declarations }
   end;
@@ -73,6 +87,11 @@ begin
   ;
 end;
 
+procedure TMain.actCloseTabExecute(Sender: TObject);
+begin
+  ;
+end;
+
 procedure TMain.actFindDllNextExecutableFileExecute(Sender: TObject);
 begin
   FindDllNextExecutableFile;
@@ -83,7 +102,7 @@ procedure TMain.RefreshTree;
 const
   IMG_INDEX_DLL = 0;
   IMG_INDEX_FIRST_NODE = 2;
-  IMG_INDEX_TASK = 5;
+  IMG_INDEX_TASK = 3;
 
   NAME_FIRST_NODE = 'Список доступных функций';
 
@@ -117,6 +136,43 @@ begin
   end;
 end;
 
+procedure TMain.tsTasksChange(Sender: TObject; NewTab: Integer;
+  var AllowChange: Boolean);
+var
+  ObjTab: TObject;
+begin
+  ObjTab := tsTasks.Tabs.Objects[NewTab];
+  if Assigned(ObjTab) and (ObjTab is TFrame) then
+    TFrame(ObjTab).BringToFront;
+end;
+
+procedure TMain.CloseTab(const X, Y: Integer);
+var
+  TabIndex: Integer;
+  ObjTab: TObject;
+begin
+  TabIndex := tsTasks.ItemAtPos(Point(X, Y));
+  if TabIndex >= 0 then
+  try
+    ObjTab := tsTasks.Tabs.Objects[TabIndex];
+    if Assigned(ObjTab) then
+      FreeAndNil(ObjTab);
+
+    tsTasks.Tabs.Delete(TabIndex);
+    if tsTasks.TabIndex >= tsTasks.Tabs.Count then
+      tsTasks.TabIndex := tsTasks.Tabs.Count - 1;
+  finally
+    tsTasks.Refresh;
+  end;
+end;
+
+procedure TMain.tsTasksMouseDown(Sender: TObject; Button: TMouseButton;
+  Shift: TShiftState; X, Y: Integer);
+begin
+  if Button = mbMiddle then
+    CloseTab(X, Y);
+end;
+
 procedure TMain.tvPluginsDblClick(Sender: TObject);
 var
   SelectedNode: TTreeNode;
@@ -134,10 +190,26 @@ begin
 
   NodeData := SelectedNode.Data;
   if Supports(ITaskDefinition(NodeData), ITaskDefinition, Task) then
-  begin
-    tsTasks.Tabs.Add(Task.GetName)
+    CreateTaskTab(Task);
+end;
 
+procedure TMain.CreateTaskTab(const ATask: ITaskDefinition);
+var
+  TaskName: String;
+  FrameTask: TFrameTask;
+begin
+  if Assigned(ATask) then
+  try
+    TaskName := ATask.GetName;
+    FrameTask := TFrameTask.Create(Application,
+      ATask, FTasksFrameCreated);
+    FrameTask.Parent := pnlTasks;
 
+    tsTasks.Tabs.AddObject(TaskName, FrameTask);
+  finally
+    tsTasks.TabIndex := tsTasks.Tabs.Count - 1;
+    tsTasks.Refresh;
+    inc(FTasksFrameCreated);
   end;
 end;
 
@@ -162,6 +234,7 @@ begin
   FPlugins := TList<IPluginModule>.Create;
   FDLLHandles := TList<THandle>.Create;
   FslListOfAddedPathDLL := TStringList.Create;
+  FTasksFrameCreated := 0;
 
   {убрать}
   FindDllNextExecutableFile;
@@ -211,6 +284,11 @@ begin
     FPlugins.Add(Plugin);
     FDLLHandles.Add(hDLL);
   end;
+end;
+
+procedure TMain.miCloseTabClick(Sender: TObject);
+begin
+  ;
 end;
 
 end.

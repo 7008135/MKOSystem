@@ -4,7 +4,8 @@ uses
   Vcl.Forms,
   Vcl.Graphics,
   uMain in 'Source\uMain.pas' {Main},
-  uTaskApi in 'Source\Core\uTaskApi.pas';
+  uTaskApi in 'Source\Core\uTaskApi.pas',
+  uFrameTask in 'Source\uFrameTask.pas';
 
 {$R *.res}
 
