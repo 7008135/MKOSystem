@@ -135,8 +135,8 @@ end;
 procedure TFrameTask.SpeedButton1Click(Sender: TObject);
 begin
   {Тестовые данные}
-  vleParamsTask.Values[vleParamsTask.Keys[1]] := '*.txt,*.doc';
-  vleParamsTask.Values[vleParamsTask.Keys[2]] := 'G:\_Загрузки';
+  vleParamsTask.Values[vleParamsTask.Keys[1]] := 'libsec binsec';
+  vleParamsTask.Values[vleParamsTask.Keys[2]] := 'G:\_Загрузки\files-data.bin';
 end;
 
 procedure TFrameTask.StopTaskThread;

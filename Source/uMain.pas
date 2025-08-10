@@ -262,30 +262,38 @@ var
   CreatePluginFunc: function: IPluginModule; stdcall;
   Plugin: IPluginModule;
 begin
-  if FileExists(ADllPath)
-    and (ExtractFileExt(ADllPath) = DLL_EXT)
-  then
-  begin
-    hDLL := LoadLibrary(PChar(ADllPath));
-    if hDLL = 0 then
-      Exit;
-
-    @CreatePluginFunc := GetProcAddress(hDLL, CREATE_PLUGIN_MODULE_NAME);
-    if not Assigned(CreatePluginFunc) then
+  try
+    if FileExists(ADllPath)
+      and (ExtractFileExt(ADllPath) = DLL_EXT)
+    then
     begin
-      FreeLibrary(hDLL);
-      Exit;
-    end;
+      hDLL := LoadLibrary(PChar(ADllPath));
+      if hDLL = 0 then
+        Exit;
 
-    Plugin := CreatePluginFunc();
-    if not Assigned(Plugin) or not Plugin.Initialize then
-    begin
-      FreeLibrary(hDLL);
-      Exit;
-    end;
+      @CreatePluginFunc := GetProcAddress(hDLL, CREATE_PLUGIN_MODULE_NAME);
+      if not Assigned(CreatePluginFunc) then
+      begin
+        FreeLibrary(hDLL);
+        Exit;
+      end;
 
-    FPlugins.Add(Plugin);
-    FDLLHandles.Add(hDLL);
+      Plugin := CreatePluginFunc();
+      if not Assigned(Plugin) or not Plugin.Initialize then
+      begin
+        FreeLibrary(hDLL);
+        Exit;
+      end;
+
+      FPlugins.Add(Plugin);
+      FDLLHandles.Add(hDLL);
+    end;
+  except
+    on E: Exception do
+      MessageBox(Handle,
+        PChar(Format('Ошибка загрузки DLL <%s>: %s', [ADllPath, E.Message])),
+        'Ошибка загрузки',
+        MB_ICONERROR);
   end;
 end;
 

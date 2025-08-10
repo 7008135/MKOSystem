@@ -101,6 +101,7 @@ function TDocParser.Execute(const AParams: TArray<TTaskDefinitionParam>;
     PResultStrings.BeginUpdate;
     try
       PResultStrings.Clear;
+
       Masks := TStringList.Create;
       try
         Masks.Delimiter := ',';
@@ -154,7 +155,6 @@ begin
   finally
     FStopExecute := False;
   end;
-   
 end;
 
 function TDocParser.GetDescription: string;

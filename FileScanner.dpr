@@ -85,7 +85,7 @@ end;
 
 function TFileScanner.Initialize: Boolean;
 begin
-  Result := False;
+  Result := True;
 end;
 
 function CreatePluginModule: IPluginModule; stdcall;
