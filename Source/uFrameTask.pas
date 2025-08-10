@@ -42,6 +42,8 @@ type
     miCopyResultItem: TMenuItem;
     tmrActionAfterExecue: TTimer;
     lblMessageResult: TLabel;
+    spbtnClearResult: TSpeedButton;
+    actClearResult: TAction;
     procedure vleParamsTaskMouseMove(Sender: TObject; Shift: TShiftState; X,
       Y: Integer);
     procedure actStartExecute(Sender: TObject);
@@ -50,6 +52,9 @@ type
     procedure miCopyResultItemClick(Sender: TObject);
     procedure pupLstResultPopup(Sender: TObject);
     procedure tmrActionAfterExecueTimer(Sender: TObject);
+    procedure actClearResultExecute(Sender: TObject);
+    procedure lstResultMouseMove(Sender: TObject; Shift: TShiftState; X,
+      Y: Integer);
   private
     FTask: ITaskDefinition;
     FTaskParam: TArray<TTaskDefinitionParam>;
@@ -67,6 +72,11 @@ implementation
 {$R *.dfm}
 
 { TFrameTask }
+
+procedure TFrameTask.actClearResultExecute(Sender: TObject);
+begin
+  lstResult.Clear;
+end;
 
 procedure TFrameTask.actStartExecute(Sender: TObject);
   function AreAllKeysFilled: Boolean;
@@ -91,6 +101,7 @@ begin
 
   actStop.Enabled := True;
   actStart.Enabled := False;
+  actClearResult.Enabled := False;
 
   prbrProcessTask.State := pbsNormal;
   FTaskAnonymousThread := TThread.CreateAnonymousThread(
@@ -98,11 +109,12 @@ begin
   var
     ExcResult: Boolean;
     ResultStrings: TStrings;
+    ResultCount: Integer;
   begin
     FTaskAnonymousThread.FreeOnTerminate := False;
-    lstResult.Clear;
 
     ResultStrings := lstResult.Items;
+    ResultCount := ResultStrings.Count;
     ExcResult := FTask.Execute(FTaskParam, ResultMsg, @ResultStrings);
 
     TThread.Synchronize(nil,
@@ -113,10 +125,11 @@ begin
 
         {Обновим состояние кнопокй}
         actStop.Enabled := False;
+        actClearResult.Enabled := True;
         actStart.Enabled := True;
 
         lblMessageResult.Visible := True;
-        lblMessageResult.Caption := Format('Задача завершена, результатов: %d', [lstResult.Items.Count]);
+        lblMessageResult.Caption := Format('Задача завершена, результатов: %d', [lstResult.Items.Count - ResultCount]);
         tmrActionAfterExecue.Enabled := True;
 
         {Выведем ответ если он есть}
@@ -135,8 +148,8 @@ end;
 procedure TFrameTask.SpeedButton1Click(Sender: TObject);
 begin
   {Тестовые данные}
-  vleParamsTask.Values[vleParamsTask.Keys[1]] := 'libsec binsec';
-  vleParamsTask.Values[vleParamsTask.Keys[2]] := 'G:\_Загрузки\files-data.bin';
+  vleParamsTask.Values[vleParamsTask.Keys[1]] := 'ipconfig';
+//  vleParamsTask.Values[vleParamsTask.Keys[2]] := 'G:\_Загрузки\files-data.bin';
 end;
 
 procedure TFrameTask.StopTaskThread;
@@ -193,6 +206,21 @@ destructor TFrameTask.Destroy;
 begin
   StopTaskThread;
   inherited;
+end;
+
+procedure TFrameTask.lstResultMouseMove(Sender: TObject; Shift: TShiftState; X,
+  Y: Integer);
+var
+  Index: Integer;
+begin
+  Index := lstResult.ItemAtPos(Point(X, Y), True);
+  if Index >= 0 then
+  begin
+    lstResult.Hint := lstResult.Items[Index];
+    lstResult.ShowHint := True;
+  end
+  else
+    lstResult.ShowHint := False;
 end;
 
 procedure TFrameTask.miCopyResultItemClick(Sender: TObject);

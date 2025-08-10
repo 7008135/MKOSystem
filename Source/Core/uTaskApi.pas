@@ -45,6 +45,7 @@ type
     procedure Finalize;
     function GetTasks: TList<ITaskDefinition>;
     function GetNameModule: String;
+    function GetClassType: TClass;
   end;
 
 type

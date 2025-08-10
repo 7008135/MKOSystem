@@ -37,7 +37,7 @@ object Main: TMain
     TabOrder = 2
     OnDblClick = tvPluginsDblClick
   end
-  object Panel1: TPanel
+  object pnlHeaderBtns: TPanel
     AlignWithMargins = True
     Left = 1
     Top = 3
@@ -47,7 +47,7 @@ object Main: TMain
     Margins.Bottom = 0
     Align = alTop
     BevelOuter = bvNone
-    Caption = 'Panel1'
+    Caption = 'pnlHeaderBtns'
     ShowCaption = False
     TabOrder = 0
     ExplicitLeft = 3
@@ -549,5 +549,12 @@ object Main: TMain
       Caption = #1047#1072#1082#1088#1099#1090#1100
       OnClick = actCloseTabExecute
     end
+  end
+  object ofdOpenDll: TOpenDialog
+    Filter = 'DLL|*.dll'
+    Options = [ofHideReadOnly, ofAllowMultiSelect, ofEnableSizing]
+    Title = #1042#1099#1073#1077#1088#1080#1090#1077' DLL'
+    Left = 594
+    Top = 270
   end
 end

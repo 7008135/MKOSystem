@@ -31,7 +31,7 @@ uses
 type
   TMain = class(TForm)
     tvPlugins: TTreeView;
-    Panel1: TPanel;
+    pnlHeaderBtns: TPanel;
     sbtnAddDll: TSpeedButton;
     VirtualImageList1: TVirtualImageList;
     ImageCollection1: TImageCollection;
@@ -47,6 +47,7 @@ type
     pnlTasks: TPanel;
     pupTabSet: TPopupMenu;
     miCloseTab: TMenuItem;
+    ofdOpenDll: TOpenDialog;
     procedure actAddDllExecute(Sender: TObject);
     procedure actFindDllNextExecutableFileExecute(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -64,7 +65,7 @@ type
     FDLLHandles: TList<THandle>;
     FslListOfAddedPathDLL: TStringList;
     FTasksFrameCreated: Integer;
-    procedure LoadPlugin(const ADllPath: String);
+    function LoadPlugin(const ADllPath: String): Boolean;
     procedure FindDllNextExecutableFile;
     procedure RefreshTree;
     procedure CreateTaskTab(const ATask: ITaskDefinition);
@@ -84,8 +85,27 @@ const
   DLL_EXT = '.dll';
 
 procedure TMain.actAddDllExecute(Sender: TObject);
+var
+  CountLoadedLeastOne: Integer;
 begin
-  ;
+  CountLoadedLeastOne := 0;
+  if ofdOpenDll.Execute and (ofdOpenDll.Files.Count > 0) then
+  begin
+    try
+      for var Index := 0 to ofdOpenDll.Files.Count - 1 do
+        if LoadPlugin(ofdOpenDll.Files[Index]) then
+          Inc(CountLoadedLeastOne)
+    finally
+      if CountLoadedLeastOne > 0 then
+      begin
+        RefreshTree;
+        ShowMessage(Format('Загружено <%d шт> DLL.', [CountLoadedLeastOne]))
+      end
+      else
+        MessageBox(Handle, 'Не удалось загрузить выбранные DLL.',
+          'Уведомление', MB_ICONINFORMATION);
+    end;
+  end;
 end;
 
 procedure TMain.actCloseTabExecute(Sender: TObject);
@@ -188,7 +208,6 @@ begin
   if SelectedNode.Data = nil then
     Exit;
 
-
   NodeData := SelectedNode.Data;
   if Supports(ITaskDefinition(NodeData), ITaskDefinition, Task) then
     CreateTaskTab(Task);
@@ -256,12 +275,21 @@ begin
   tvPlugins.FullExpand
 end;
 
-procedure TMain.LoadPlugin(const ADllPath: String);
+function TMain.LoadPlugin(const ADllPath: String): Boolean;
+  function IsRepetition(const APlugin: IPluginModule): Boolean;
+  begin
+    Result := False;
+    if Assigned(APlugin) and Supports(APlugin, IPluginModule) then
+      for var Plugin in FPlugins do
+        if Plugin.GetClassType = APlugin.GetClassType then
+          Exit(True);
+  end;
 var
   hDLL: THandle;
   CreatePluginFunc: function: IPluginModule; stdcall;
   Plugin: IPluginModule;
 begin
+  Result := False;
   try
     if FileExists(ADllPath)
       and (ExtractFileExt(ADllPath) = DLL_EXT)
@@ -285,8 +313,12 @@ begin
         Exit;
       end;
 
-      FPlugins.Add(Plugin);
-      FDLLHandles.Add(hDLL);
+      if not IsRepetition(Plugin) then
+      begin
+        FPlugins.Add(Plugin);
+        FDLLHandles.Add(hDLL);
+        Result := True;
+      end;
     end;
   except
     on E: Exception do

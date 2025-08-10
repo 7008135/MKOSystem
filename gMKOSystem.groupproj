@@ -9,6 +9,9 @@
         <Projects Include="FileScanner.dproj">
             <Dependencies/>
         </Projects>
+        <Projects Include="ShellPerfomer.dproj">
+            <Dependencies/>
+        </Projects>
     </ItemGroup>
     <ProjectExtensions>
         <Borland.Personality>Default.Personality.12</Borland.Personality>
@@ -35,14 +38,23 @@
     <Target Name="FileScanner:Make">
         <MSBuild Projects="FileScanner.dproj" Targets="Make"/>
     </Target>
+    <Target Name="ShellPerfomer">
+        <MSBuild Projects="ShellPerfomer.dproj"/>
+    </Target>
+    <Target Name="ShellPerfomer:Clean">
+        <MSBuild Projects="ShellPerfomer.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="ShellPerfomer:Make">
+        <MSBuild Projects="ShellPerfomer.dproj" Targets="Make"/>
+    </Target>
     <Target Name="Build">
-        <CallTarget Targets="MKOSystem;FileScanner"/>
+        <CallTarget Targets="MKOSystem;FileScanner;ShellPerfomer"/>
     </Target>
     <Target Name="Clean">
-        <CallTarget Targets="MKOSystem:Clean;FileScanner:Clean"/>
+        <CallTarget Targets="MKOSystem:Clean;FileScanner:Clean;ShellPerfomer:Clean"/>
     </Target>
     <Target Name="Make">
-        <CallTarget Targets="MKOSystem:Make;FileScanner:Make"/>
+        <CallTarget Targets="MKOSystem:Make;FileScanner:Make;ShellPerfomer:Make"/>
     </Target>
     <Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
 </Project>

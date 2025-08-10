@@ -49,6 +49,7 @@ type
     procedure Finalize;
     function GetTasks: TList<ITaskDefinition>;
     function GetNameModule: String;
+    function GetClassType: TClass;
   end;
 
 { TFileScanner }
@@ -71,6 +72,11 @@ end;
 procedure TFileScanner.Finalize;
 begin
   FreeAndNil(FTasks);
+end;
+
+function TFileScanner.GetClassType: TClass;
+begin
+  Result := ClassType;
 end;
 
 function TFileScanner.GetNameModule: String;
