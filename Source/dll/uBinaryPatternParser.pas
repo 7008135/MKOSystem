@@ -26,11 +26,7 @@ uses
   uTaskApi;
 
 type
-  TBinaryPatternParser = class(TInterfacedObject, ITaskDefinition)
-  private
-    FName: String;
-    FDescription: String;
-    FStopExecute: Boolean;
+  TBinaryPatternParser = class(TTaskDefinition, ITaskDefinition)
   public
     constructor Create;
     destructor Destroy; override;
@@ -42,7 +38,6 @@ type
     function Execute(const AParams: TArray<TTaskDefinitionParam>;
       var AResultMsg: String;
       const PResultStrings: PStrings): Boolean;
-    procedure StopExecute;
     {FINISH - Реализация интерфейса}
   end;
 
@@ -260,11 +255,6 @@ begin
     MakeParam('Characters', 'Последовательность символов', 'Последовательность символов через пробел: libsec binsec'),
     MakeParam('ScanFilePath', 'Путь к BIN', 'Путь к бинарному файлу: G:\_Загрузки\Test.bin')
   ];
-end;
-
-procedure TBinaryPatternParser.StopExecute;
-begin
-  FStopExecute := True;
 end;
 
 end.

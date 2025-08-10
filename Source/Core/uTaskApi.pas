@@ -47,6 +47,17 @@ type
     function GetNameModule: String;
   end;
 
+type
+  TTaskDefinition = class(TInterfacedObject)
+  protected
+    FStopExecute: Boolean;
+    FName: String;
+    FDescription: String;
+  public
+    procedure StopExecute;
+    constructor Create;
+  end;
+
 /// <summary>
 /// Заполняет запись TTaskDefinitionParam заданными значениями
 /// </summary>
@@ -77,6 +88,18 @@ begin
   Result.NameParam := ANameParam;
   Result.DescriptionParam := ADescriptionParam;
   Result.Value := '';
+end;
+
+{ TTaskDefinition }
+
+constructor TTaskDefinition.Create;
+begin
+  FStopExecute := False;
+end;
+
+procedure TTaskDefinition.StopExecute;
+begin
+  FStopExecute := True;
 end;
 
 end.

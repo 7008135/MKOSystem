@@ -27,11 +27,7 @@ uses
   uTaskApi;
 
 type
-  TDocParser = class(TInterfacedObject, ITaskDefinition)
-  private
-    FName: String;
-    FDescription: String;
-    FStopExecute: Boolean;
+  TDocParser = class(TTaskDefinition, ITaskDefinition)
   public
     constructor Create;
     destructor Destroy; override;
@@ -43,7 +39,6 @@ type
     function Execute(const AParams: TArray<TTaskDefinitionParam>; 
       var AResultMsg: String;
       const PResultStrings: PStrings): Boolean;
-    procedure StopExecute;
     {FINISH - Реализация интерфейса}
   end;
 
@@ -173,11 +168,6 @@ begin
     MakeParam(NAME_PARAM_MASKS, 'Маски файлов', 'Одна или несколько масок через запятую, пример: *.txt,*.doc'),
     MakeParam(NAME_PARAM_PATH, 'Путь для поиска', 'Корневая папка для поиска файлов')
   ];
-end;
-
-procedure TDocParser.StopExecute;
-begin
-  FStopExecute := True;
 end;
 
 end.
