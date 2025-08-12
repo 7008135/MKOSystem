@@ -18,7 +18,7 @@ uses
   System.Classes,
   System.Generics.Collections,
   uTaskApi in 'Source\Core\uTaskApi.pas',
-  uShellExecutingCommand in 'uShellExecutingCommand.pas';
+  uShellExecutingCommand in 'Source\dll\uShellExecutingCommand.pas';
 
 type
   TShellPerfomer = class(TInterfacedObject, IPluginModule)

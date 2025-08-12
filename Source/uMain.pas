@@ -42,7 +42,6 @@ type
     Splitter1: TSplitter;
     StatusBar1: TStatusBar;
     Panel2: TPanel;
-    pupTreeView: TPopupMenu;
     tsTasks: TTabSet;
     pnlTasks: TPanel;
     pupTabSet: TPopupMenu;
@@ -54,24 +53,52 @@ type
     procedure FormDestroy(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure tvPluginsDblClick(Sender: TObject);
-    procedure miCloseTabClick(Sender: TObject);
     procedure tsTasksChange(Sender: TObject; NewTab: Integer;
       var AllowChange: Boolean);
-    procedure actCloseTabExecute(Sender: TObject);
     procedure tsTasksMouseDown(Sender: TObject; Button: TMouseButton;
       Shift: TShiftState; X, Y: Integer);
+    procedure miCloseTabClick(Sender: TObject);
+    procedure pupTabSetPopup(Sender: TObject);
   private
+    /// <summary>
+    /// Список доступных плагинов (подключенных dll)
+    /// </summary>
     FPlugins: TList<IPluginModule>;
     FDLLHandles: TList<THandle>;
-    FslListOfAddedPathDLL: TStringList;
+
+    /// <summary>
+    /// Счетчик созданных фреймов задач
+    /// </summary>
     FTasksFrameCreated: Integer;
+
+    /// <summary>
+    /// Загрузка dll в программу
+    /// </summary>
+    /// <param name="ADllPath">
+    ///   Путь к Dll
+    /// </param>
     function LoadPlugin(const ADllPath: String): Boolean;
+
+    /// <summary>
+    /// Поиск dll рядом с Exe
+    /// </summary>
     procedure FindDllNextExecutableFile;
-    procedure RefreshTree;
+
+    /// <summary>
+    /// Создание вкладки и задачи
+    /// </summary>
     procedure CreateTaskTab(const ATask: ITaskDefinition);
-    procedure CloseTab(const X, Y: Integer);
+
+    /// <summary>
+    /// Закрыть вкладку
+    /// </summary>
+    procedure CloseTab(const ATabIndex: Integer);
   public
-    { Public declarations }
+
+    /// <summary>
+    /// Переформирование дерева плагинов
+    /// </summary>
+    procedure RefreshTree;
   end;
 
 var
@@ -106,11 +133,6 @@ begin
           'Уведомление', MB_ICONINFORMATION);
     end;
   end;
-end;
-
-procedure TMain.actCloseTabExecute(Sender: TObject);
-begin
-  ;
 end;
 
 procedure TMain.actFindDllNextExecutableFileExecute(Sender: TObject);
@@ -167,19 +189,17 @@ begin
     TFrame(ObjTab).BringToFront;
 end;
 
-procedure TMain.CloseTab(const X, Y: Integer);
+procedure TMain.CloseTab(const ATabIndex: Integer);
 var
-  TabIndex: Integer;
   ObjTab: TObject;
 begin
-  TabIndex := tsTasks.ItemAtPos(Point(X, Y));
-  if TabIndex >= 0 then
+  if ATabIndex >= 0 then
   try
-    ObjTab := tsTasks.Tabs.Objects[TabIndex];
+    ObjTab := tsTasks.Tabs.Objects[ATabIndex];
     if Assigned(ObjTab) then
       FreeAndNil(ObjTab);
 
-    tsTasks.Tabs.Delete(TabIndex);
+    tsTasks.Tabs.Delete(ATabIndex);
     if tsTasks.TabIndex >= tsTasks.Tabs.Count then
       tsTasks.TabIndex := tsTasks.Tabs.Count - 1;
   finally
@@ -189,9 +209,15 @@ end;
 
 procedure TMain.tsTasksMouseDown(Sender: TObject; Button: TMouseButton;
   Shift: TShiftState; X, Y: Integer);
+var
+  TabIndex: Integer;
 begin
   if Button = mbMiddle then
-    CloseTab(X, Y);
+  begin
+    TabIndex := tsTasks.ItemAtPos(Point(X, Y));
+    if TabIndex <> -1 then
+      CloseTab(TabIndex);
+  end;
 end;
 
 procedure TMain.tvPluginsDblClick(Sender: TObject);
@@ -255,10 +281,8 @@ procedure TMain.FormCreate(Sender: TObject);
 begin
   FPlugins := TList<IPluginModule>.Create;
   FDLLHandles := TList<THandle>.Create;
-  FslListOfAddedPathDLL := TStringList.Create;
   FTasksFrameCreated := 0;
 
-  {убрать}
   FindDllNextExecutableFile;
   RefreshTree
 end;
@@ -276,6 +300,7 @@ begin
 end;
 
 function TMain.LoadPlugin(const ADllPath: String): Boolean;
+
   function IsRepetition(const APlugin: IPluginModule): Boolean;
   begin
     Result := False;
@@ -331,7 +356,21 @@ end;
 
 procedure TMain.miCloseTabClick(Sender: TObject);
 begin
-  ;
+  CloseTab(miCloseTab.Tag)
+end;
+
+procedure TMain.pupTabSetPopup(Sender: TObject);
+var
+  MousePos: TPoint;
+  TabIndex: Integer;
+begin
+  GetCursorPos(MousePos);
+  MousePos := tsTasks.ScreenToClient(MousePos);
+  TabIndex := tsTasks.ItemAtPos(MousePos);
+  miCloseTab.Enabled := TabIndex <> -1;
+
+  if miCloseTab.Enabled then
+    miCloseTab.Tag := TabIndex;
 end;
 
 end.

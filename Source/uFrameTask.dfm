@@ -80,25 +80,6 @@ object FrameTask: TFrameTask
       ShowHint = True
       ExplicitLeft = 2
     end
-    object SpeedButton1: TSpeedButton
-      AlignWithMargins = True
-      Left = 70
-      Top = 1
-      Width = 30
-      Height = 30
-      Margins.Left = 2
-      Margins.Top = 1
-      Margins.Right = 2
-      Margins.Bottom = 1
-      Align = alLeft
-      ImageIndex = 1
-      ImageName = 'icons8-stop'
-      Images = VirtualImageList1
-      ParentShowHint = False
-      ShowHint = True
-      OnClick = SpeedButton1Click
-      ExplicitLeft = 104
-    end
     object spbtnClearResult: TSpeedButton
       AlignWithMargins = True
       Left = 584

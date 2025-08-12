@@ -37,7 +37,6 @@ type
     prbrProcessTask: TProgressBar;
     lstResult: TListBox;
     Splitter1: TSplitter;
-    SpeedButton1: TSpeedButton;
     pupLstResult: TPopupMenu;
     miCopyResultItem: TMenuItem;
     tmrActionAfterExecue: TTimer;
@@ -48,7 +47,6 @@ type
       Y: Integer);
     procedure actStartExecute(Sender: TObject);
     procedure actStopExecute(Sender: TObject);
-    procedure SpeedButton1Click(Sender: TObject);
     procedure miCopyResultItemClick(Sender: TObject);
     procedure pupLstResultPopup(Sender: TObject);
     procedure tmrActionAfterExecueTimer(Sender: TObject);
@@ -79,6 +77,7 @@ begin
 end;
 
 procedure TFrameTask.actStartExecute(Sender: TObject);
+
   function AreAllKeysFilled: Boolean;
   var
     KeyValue: String;
@@ -143,13 +142,6 @@ begin
       end);
   end);
   FTaskAnonymousThread.Start;
-end;
-
-procedure TFrameTask.SpeedButton1Click(Sender: TObject);
-begin
-  {Тестовые данные}
-  vleParamsTask.Values[vleParamsTask.Keys[1]] := 'ipconfig';
-//  vleParamsTask.Values[vleParamsTask.Keys[2]] := 'G:\_Загрузки\files-data.bin';
 end;
 
 procedure TFrameTask.StopTaskThread;

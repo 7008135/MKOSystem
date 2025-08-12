@@ -538,16 +538,13 @@ object Main: TMain
       OnExecute = actFindDllNextExecutableFileExecute
     end
   end
-  object pupTreeView: TPopupMenu
-    Left = 463
-    Top = 371
-  end
   object pupTabSet: TPopupMenu
+    OnPopup = pupTabSetPopup
     Left = 386
     Top = 366
     object miCloseTab: TMenuItem
       Caption = #1047#1072#1082#1088#1099#1090#1100
-      OnClick = actCloseTabExecute
+      OnClick = miCloseTabClick
     end
   end
   object ofdOpenDll: TOpenDialog
